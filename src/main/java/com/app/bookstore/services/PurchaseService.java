@@ -1,0 +1,202 @@
+package com.app.bookstore.services;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Service;
+
+import com.app.bookstore.entities.BookEntity;
+import com.app.bookstore.entities.ClientEntity;
+import com.app.bookstore.entities.OrderEntity;
+import com.app.bookstore.entities.PurchaseEntity;
+import com.app.bookstore.exceptions.BookStoreErrorCodes;
+import com.app.bookstore.exceptions.PurchaseException;
+import com.app.bookstore.repositories.BooksRepository;
+import com.app.bookstore.repositories.ClientsRepository;
+import com.app.bookstore.types.BookType;
+
+import lombok.AllArgsConstructor;
+
+@Service
+@AllArgsConstructor
+public class PurchaseService implements StoreService<OrderEntity> {
+
+    ClientsRepository clientsRepository;
+    BooksRepository booksRepository;
+
+    /**
+     * Calculates the total price of the order and the loyalty points earned by the
+     * client.
+     * Pricing rules:
+     * - New Releases: Full price (100% of the price).
+     * - Regular: Full price, but a 10% discount applies if 3 or more books are
+     * purchased.
+     * - Old Editions: 20% discount, with an additional 5% discount if 3 or more
+     * books are purchased.
+     * - 1 loyalty point is awarded on every purchased book.
+     * - The books that are in the list of free books are not included in the
+     * calculation. This applies to Regular and Old Editions.
+     * 
+     * @param books     The list of books to calculate the price and loyalty points
+     *                  for.
+     * @param freeBooks The list of free book isbn to exclude from the calculation.
+     * @return A PurchaseEntity containing the calculated total price and loyalty
+     *         points.
+     */
+    public PurchaseEntity calculateOrderDetails(List<BookEntity> books, List<String> freeBooks) {
+        final long[] totalPrice = { 0L };
+        final long[] loyaltyPoints = { 0L };
+
+        if (books != null) {
+            books.forEach(book -> {
+                if (freeBooks != null && freeBooks.contains(book.getIsbn()) && book.getType() != BookType.NEW_RELEASE) {
+                    return; // Skip processing for free books
+                }
+
+                long bookPrice = book.getPrice();
+                switch (book.getType()) {
+                    case BookType.NEW_RELEASE:
+                        totalPrice[0] += bookPrice;
+                        loyaltyPoints[0]++;
+                        break;
+                    case BookType.REGULAR:
+                        if (books.size() >= 3) {
+                            totalPrice[0] += bookPrice * 0.9; // 10% discount
+                        } else {
+                            totalPrice[0] += bookPrice;
+                        }
+                        loyaltyPoints[0]++;
+                        break;
+                    case BookType.OLD_EDITIONS:
+                        if (books.size() >= 3) {
+                            totalPrice[0] += bookPrice * 0.75; // 20% + 5% discount
+                        } else {
+                            totalPrice[0] += bookPrice * 0.8; // 20% discount
+                        }
+                        loyaltyPoints[0]++;
+                        break;
+                    default:
+                        throw new PurchaseException("Unknown book type: " + book.getType(),
+                                BookStoreErrorCodes.UNKNOWN_BOOK_TYPE.getErrorCode());
+                }
+            });
+        }
+
+        return PurchaseEntity.builder()
+                .loyaltyPoints(loyaltyPoints[0])
+                .totalPrice(totalPrice[0])
+                .books(books)
+                .purchaseDate(LocalDateTime.now())
+                .build();
+    }
+
+    @Override
+    public PurchaseEntity run(OrderEntity order) throws PurchaseException {
+
+        if (order == null) {
+            throw new PurchaseException("Order cannot be null", BookStoreErrorCodes.INCORRECT_ORDER.getErrorCode());
+        }
+
+        ClientEntity client = getClient(order);
+
+
+        List<BookEntity> books = getBooks(order);
+
+        checkLoyaltyPoints(order, client);
+
+        PurchaseEntity purchase = calculateOrderDetails(books, order.getIsbnFreeList());
+        purchase.setClient(client);
+
+        long usedLoyaltyPoints = getUsedLoyaltyPoints(books, order.getIsbnFreeList());
+        updateClientLoyaltyPoints(client, purchase.getLoyaltyPoints(), usedLoyaltyPoints);
+
+
+        updateBooksSoldStatus(books);
+
+        return purchase;
+    }
+
+    private Long getUsedLoyaltyPoints(List<BookEntity> books, List<String> freeBooks) {
+        return books.stream()
+        .filter(book -> freeBooks.contains(book.getIsbn()) && book.getType() != BookType.NEW_RELEASE)
+                .count() * 10l;
+    }
+
+    private void updateBooksSoldStatus(List<BookEntity> books) {
+        books.forEach(book -> {
+            book.setSold(true);
+            booksRepository.save(book);
+        });
+
+        booksRepository.saveAll(books);
+    }
+
+    private void updateClientLoyaltyPoints(ClientEntity client, Long loyaltyPoints, Long usedPoints) {
+        client.setLoyaltyPoints(client.getLoyaltyPoints() + loyaltyPoints - usedPoints);
+
+        clientsRepository.save(client);
+    }
+
+    private void checkLoyaltyPoints(OrderEntity order, ClientEntity client) {
+        int loyaltyPointsNeeded = order.getIsbnFreeList().size() * 10;
+        if (loyaltyPointsNeeded != 0 && client.getLoyaltyPoints() < loyaltyPointsNeeded) {
+            throw new PurchaseException("Not enough loyalty points to receive the free books",
+                    BookStoreErrorCodes.NOT_ENOUGH_LOYALTY_POINTS.getErrorCode());
+        }
+    }
+
+    private List<BookEntity> getBooks(OrderEntity order) {
+        if (order.getIsbnList() == null || order.getIsbnList().isEmpty()) {
+            throw new PurchaseException("The list of books cannot be null or empty",
+                    BookStoreErrorCodes.INCORRECT_ORDER.getErrorCode());
+        }
+
+        // Check if the books in the order exist in the list of available books
+        // If not, throw an exception
+        List<BookEntity> books = booksRepository.findAllByIsbn(order.getIsbnList());
+        if (books == null || books.isEmpty()) {
+            throw new PurchaseException("No books found for the given ISBN list",
+                    BookStoreErrorCodes.BOOK_NOT_FOUND.getErrorCode());
+        }
+
+        if (books.size() != order.getIsbnList().size()) {
+            List<String> dbIsbnList = books.stream()
+                    .map(BookEntity::getIsbn)
+                    .collect(Collectors.toList());
+
+            List<String> nonExistingISBNList = order.getIsbnList().stream()
+                    .filter(isbn -> !dbIsbnList.contains(isbn))
+                    .collect(Collectors.toList());
+            throw new PurchaseException("Book with ISBN " + nonExistingISBNList + " does not exist",
+                    BookStoreErrorCodes.BOOK_NOT_FOUND.getErrorCode());
+        }
+
+        // Check if the free books in the order exist in the list of available books
+        // If not, throw an exception
+        List<String> nonExistIsbnFreeList = order.getIsbnFreeList()
+                .stream()
+                .filter(isbn -> !order.getIsbnList().contains(isbn))
+                .collect(Collectors.toList());
+        if (nonExistIsbnFreeList.size() > 0) {
+            throw new PurchaseException(
+                    "To use the loyalty the point the books with ISBN " + nonExistIsbnFreeList
+                            + " should be in the list of purchased books.",
+                    BookStoreErrorCodes.BOOK_NOT_FOUND.getErrorCode());
+        }
+        return books;
+    }
+
+    private ClientEntity getClient(OrderEntity order) {
+        if (order.getClientId() == null) {
+            throw new PurchaseException("Client ID cannot be null",
+                    BookStoreErrorCodes.CLIENT_NOT_FOUND.getErrorCode());
+        }
+
+        ClientEntity client = clientsRepository.findById(order.getClientId())
+                .orElseThrow(() -> new PurchaseException("Client with ID " + order.getClientId() + " not found",
+                        BookStoreErrorCodes.CLIENT_NOT_FOUND.getErrorCode()));
+        return client;
+    }
+
+}
