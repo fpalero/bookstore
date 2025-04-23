@@ -7,7 +7,4 @@ import com.app.bookstore.entities.ClientEntity;
 
 @Repository
 public interface ClientsRepository extends JpaRepository<ClientEntity, Long> {
-
-   
-    
 }

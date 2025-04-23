@@ -12,7 +12,7 @@ import com.app.bookstore.entities.BookEntity;
 @Repository
 public interface BooksRepository extends JpaRepository<BookEntity, Long> {
 
-    @Query("SELECT b FROM BookEntity b WHERE b.isbn IN :isbnList")
+    @Query("SELECT b FROM BookEntity b WHERE b.isbn IN :isbnList AND b.sold = false")
 	public List<BookEntity> findAllByIsbn(@Param("isbnList") List<String> isbnList);
 
     @Query("SELECT b FROM BookEntity b WHERE b.sold = false")

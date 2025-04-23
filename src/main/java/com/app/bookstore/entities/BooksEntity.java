@@ -4,18 +4,15 @@ import java.util.List;
 
 import jakarta.persistence.MappedSuperclass;
 import lombok.AllArgsConstructor;
-
+import lombok.Builder;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
 
 @Data
-@SuperBuilder
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @MappedSuperclass
-@EqualsAndHashCode(callSuper = true)
-public class BooksEntity extends StoreEntity {
+public class BooksEntity implements StoreEntity {
     private List<BookEntity> books;
 }

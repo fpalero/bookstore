@@ -3,17 +3,15 @@ package com.app.bookstore.entities;
 import java.util.List;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
 
 @Data
-@SuperBuilder
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode(callSuper = true)
-public class OrderEntity extends StoreEntity {
+public class OrderEntity implements StoreEntity {
     private Long clientId;
     private List<String> isbnList;
     private List<String> isbnFreeList;

@@ -16,14 +16,16 @@ import com.app.bookstore.repositories.BooksRepository;
 import com.app.bookstore.repositories.ClientsRepository;
 import com.app.bookstore.types.BookType;
 
-import lombok.AllArgsConstructor;
-
 @Service
-@AllArgsConstructor
 public class PurchaseService implements StoreService<OrderEntity> {
 
     ClientsRepository clientsRepository;
     BooksRepository booksRepository;
+
+    public PurchaseService(ClientsRepository clientsRepository, BooksRepository booksRepository) {
+        this.clientsRepository = clientsRepository;
+        this.booksRepository = booksRepository;
+    }
 
     /**
      * Calculates the total price of the order and the loyalty points earned by the
@@ -100,10 +102,9 @@ public class PurchaseService implements StoreService<OrderEntity> {
 
         ClientEntity client = getClient(order);
 
-
         List<BookEntity> books = getBooks(order);
 
-        checkLoyaltyPoints(order, client);
+        checkLoyaltyPoints(order.getIsbnFreeList(), client);
 
         PurchaseEntity purchase = calculateOrderDetails(books, order.getIsbnFreeList());
         purchase.setClient(client);
@@ -111,15 +112,19 @@ public class PurchaseService implements StoreService<OrderEntity> {
         long usedLoyaltyPoints = getUsedLoyaltyPoints(books, order.getIsbnFreeList());
         updateClientLoyaltyPoints(client, purchase.getLoyaltyPoints(), usedLoyaltyPoints);
 
-
         updateBooksSoldStatus(books);
 
         return purchase;
     }
 
     private Long getUsedLoyaltyPoints(List<BookEntity> books, List<String> freeBooks) {
+        if (freeBooks == null || freeBooks.isEmpty()) {
+            return 0L;
+            
+        }
+        // Calculate the number of loyalty points used for the books purchased
         return books.stream()
-        .filter(book -> freeBooks.contains(book.getIsbn()) && book.getType() != BookType.NEW_RELEASE)
+                .filter(book -> freeBooks.contains(book.getIsbn()) && book.getType() != BookType.NEW_RELEASE)
                 .count() * 10l;
     }
 
@@ -138,8 +143,9 @@ public class PurchaseService implements StoreService<OrderEntity> {
         clientsRepository.save(client);
     }
 
-    private void checkLoyaltyPoints(OrderEntity order, ClientEntity client) {
-        int loyaltyPointsNeeded = order.getIsbnFreeList().size() * 10;
+    private void checkLoyaltyPoints(List<String> isbnFreeList, ClientEntity client) {
+
+        int loyaltyPointsNeeded = isbnFreeList == null ? 0 : isbnFreeList.size() * 10;
         if (loyaltyPointsNeeded != 0 && client.getLoyaltyPoints() < loyaltyPointsNeeded) {
             throw new PurchaseException("Not enough loyalty points to receive the free books",
                     BookStoreErrorCodes.NOT_ENOUGH_LOYALTY_POINTS.getErrorCode());
@@ -174,16 +180,19 @@ public class PurchaseService implements StoreService<OrderEntity> {
 
         // Check if the free books in the order exist in the list of available books
         // If not, throw an exception
-        List<String> nonExistIsbnFreeList = order.getIsbnFreeList()
-                .stream()
-                .filter(isbn -> !order.getIsbnList().contains(isbn))
-                .collect(Collectors.toList());
-        if (nonExistIsbnFreeList.size() > 0) {
-            throw new PurchaseException(
-                    "To use the loyalty the point the books with ISBN " + nonExistIsbnFreeList
-                            + " should be in the list of purchased books.",
-                    BookStoreErrorCodes.BOOK_NOT_FOUND.getErrorCode());
+        if (order.getIsbnFreeList() != null) {
+            List<String> nonExistIsbnFreeList = order.getIsbnFreeList()
+                    .stream()
+                    .filter(isbn -> !order.getIsbnList().contains(isbn))
+                    .collect(Collectors.toList());
+            if (nonExistIsbnFreeList.size() > 0) {
+                throw new PurchaseException(
+                        "To use the loyalty the point the books with ISBN " + nonExistIsbnFreeList
+                                + " should be in the list of purchased books.",
+                        BookStoreErrorCodes.BOOK_NOT_FOUND.getErrorCode());
+            }
         }
+
         return books;
     }
 

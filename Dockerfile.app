@@ -3,7 +3,7 @@ FROM gradle:8.4-jdk21 AS build
 WORKDIR /app
 COPY build.gradle settings.gradle ./
 COPY src ./src
-RUN gradle build -x test
+RUN gradle build
 
 # Production stage
 FROM openjdk:21-slim

@@ -3,12 +3,11 @@ package com.app.bookstore.entities;
 import jakarta.persistence.Table;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
-
 
 /**
  * Entity class representing a client in the bookstore system.
@@ -17,12 +16,13 @@ import lombok.experimental.SuperBuilder;
 @Entity
 @Table(name = "clients")
 @Data
-@SuperBuilder
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode(callSuper = true)
-public class ClientEntity extends StoreEntity {
+public class ClientEntity implements StoreEntity {
    
+    @Id
+    protected Long id;
     private String name;
     private String email;
     private String phone;

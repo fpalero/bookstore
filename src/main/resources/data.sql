@@ -1,10 +1,3 @@
--- Insert data into the clients table
-INSERT INTO clients (id, name, email, phone, address, loyalty_points) VALUES (1, 'John Doe', 'johndoe@example.com', '123-456-7890', '123 Main St, Springfield', 150);
-INSERT INTO clients (id, name, email, phone, address, loyalty_points) VALUES (2, 'Jane Smith', 'janesmith@example.com', '987-654-3210', '456 Elm St, Shelbyville', 200);
-INSERT INTO clients (id, name, email, phone, address, loyalty_points) VALUES (3, 'Alice Johnson', 'alicej@example.com', '555-123-4567', '789 Oak St, Capital City', 300);
-INSERT INTO clients (id, name, email, phone, address, loyalty_points) VALUES (4, 'Bob Brown', 'bobbrown@example.com', '444-555-6666', '321 Pine St, Ogdenville', 120);
-INSERT INTO clients (id, name, email, phone, address, loyalty_points) VALUES (5, 'Charlie Davis', 'charlied@example.com', '333-444-5555', '654 Maple St, North Haverbrook', 180);
-
 -- Insert data into the books table with additional fields
 INSERT INTO books (id, title, type, price, author, publisher, isbn, description, publication_year, sold) VALUES (1, 'The Great Gatsby', 'OLD_EDITIONS', 1099, 'F. Scott Fitzgerald', 'Scribner', '9780743273565', 'A novel set in the Jazz Age that tells the story of Jay Gatsby and his unrequited love for Daisy Buchanan.', 1925, false);
 INSERT INTO books (id, title, type, price, author, publisher, isbn, description, publication_year, sold) VALUES (2, '1984', 'OLD_EDITIONS', 899, 'George Orwell', 'Secker & Warburg', '9780451524935', 'A dystopian novel that explores the dangers of totalitarianism and extreme political ideology.', 1949, false);
@@ -27,3 +20,9 @@ INSERT INTO books (id, title, type, price, author, publisher, isbn, description,
 INSERT INTO books (id, title, type, price, author, publisher, isbn, description, publication_year, sold) VALUES (19, 'The Da Vinci Code', 'REGULAR', 1399, 'Dan Brown', 'Doubleday', '9780307474278', 'A mystery novel that explores religious history and secret societies.', 2003, false);
 INSERT INTO books (id, title, type, price, author, publisher, isbn, description, publication_year, sold) VALUES (20, 'The Book Thief', 'NEW_RELEASE', 1299, 'Markus Zusak', 'Picador', '9780375842207', 'A story narrated by Death about a young girl in Nazi Germany who finds solace in stealing books.', 2005, false);
 
+-- Insert data into the clients table
+INSERT INTO clients (id, name, email, phone, address, loyalty_points) VALUES (1, 'John Doe', 'johndoe@example.com', '123-456-7890', '123 Main St, Springfield', 150);
+INSERT INTO clients (id, name, email, phone, address, loyalty_points) VALUES (2, 'Jane Smith', 'janesmith@example.com', '987-654-3210', '456 Elm St, Shelbyville', 200);
+INSERT INTO clients (id, name, email, phone, address, loyalty_points) VALUES (3, 'Alice Johnson', 'alicej@example.com', '555-123-4567', '789 Oak St, Capital City', 300);
+INSERT INTO clients (id, name, email, phone, address, loyalty_points) VALUES (4, 'Bob Brown', 'bobbrown@example.com', '444-555-6666', '321 Pine St, Ogdenville', 120);
+INSERT INTO clients (id, name, email, phone, address, loyalty_points) VALUES (5, 'Charlie Davis', 'charlied@example.com', '333-444-5555', '654 Maple St, North Haverbrook', 180);

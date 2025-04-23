@@ -4,18 +4,16 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
 
 
 @Data
-@SuperBuilder
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode(callSuper = true)
-public class PurchaseEntity extends StoreEntity {
+public class PurchaseEntity implements StoreEntity {
     private ClientEntity client;
     private List<BookEntity> books;
     private Long loyaltyPoints;
