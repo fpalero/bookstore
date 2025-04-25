@@ -28,6 +28,7 @@ public class BookEntity implements StoreEntity {
     @Id
     protected Long id;
     private String title;
+    private Long quantity;
     @Enumerated(EnumType.STRING)
     private BookType type;
     private Long price;

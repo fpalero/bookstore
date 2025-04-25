@@ -6,7 +6,8 @@ public enum BookStoreErrorCodes {
     INCORRECT_ORDER(102), 
     NOT_ENOUGH_LOYALTY_POINTS(103), 
     BOOK_NOT_FOUND(104), 
-    VALIDATION_ERROR(105),;
+    VALIDATION_ERROR(105), 
+    NOT_ENOUGH_BOOKS(106);
 
     private final int code;
     BookStoreErrorCodes(int i) {

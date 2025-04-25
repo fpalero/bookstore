@@ -112,7 +112,7 @@ public class PurchaseService implements StoreService<OrderEntity> {
         long usedLoyaltyPoints = getUsedLoyaltyPoints(books, order.getIsbnFreeList());
         updateClientLoyaltyPoints(client, purchase.getLoyaltyPoints(), usedLoyaltyPoints);
 
-        updateBooksSoldStatus(books);
+        updateBooksSoldStatus(books , order.getIsbnList());
 
         return purchase;
     }
@@ -120,7 +120,7 @@ public class PurchaseService implements StoreService<OrderEntity> {
     private Long getUsedLoyaltyPoints(List<BookEntity> books, List<String> freeBooks) {
         if (freeBooks == null || freeBooks.isEmpty()) {
             return 0L;
-            
+
         }
         // Calculate the number of loyalty points used for the books purchased
         return books.stream()
@@ -128,10 +128,26 @@ public class PurchaseService implements StoreService<OrderEntity> {
                 .count() * 10l;
     }
 
-    private void updateBooksSoldStatus(List<BookEntity> books) {
+    private void updateBooksSoldStatus(List<BookEntity> books, List<String> isbnList) {
         books.forEach(book -> {
-            book.setSold(true);
-            booksRepository.save(book);
+
+            long currentQuantity = book.getQuantity();
+            long totalBooks = isbnList.stream().filter(isbn -> isbn.equals(book.getIsbn())).count();
+
+            long totalQuantity = currentQuantity - totalBooks;
+
+            if (totalQuantity < 0l) {
+                throw new PurchaseException("Not enough quantity for book with ISBN " + book.getIsbn(),
+                        BookStoreErrorCodes.NOT_ENOUGH_BOOKS.getErrorCode());
+
+            }
+
+            if (totalQuantity == 0l) {
+                book.setSold(true);
+            }
+
+            book.setQuantity(totalQuantity);
+
         });
 
         booksRepository.saveAll(books);
@@ -166,14 +182,14 @@ public class PurchaseService implements StoreService<OrderEntity> {
                     BookStoreErrorCodes.BOOK_NOT_FOUND.getErrorCode());
         }
 
-        if (books.size() != order.getIsbnList().size()) {
-            List<String> dbIsbnList = books.stream()
-                    .map(BookEntity::getIsbn)
-                    .collect(Collectors.toList());
+        List<String> dbIsbnList = books.stream()
+                .map(BookEntity::getIsbn)
+                .collect(Collectors.toList());
 
-            List<String> nonExistingISBNList = order.getIsbnList().stream()
-                    .filter(isbn -> !dbIsbnList.contains(isbn))
-                    .collect(Collectors.toList());
+        List<String> nonExistingISBNList = order.getIsbnList().stream()
+                .filter(isbn -> !dbIsbnList.contains(isbn))
+                .collect(Collectors.toList());
+        if (nonExistingISBNList.size() > 0) {
             throw new PurchaseException("Book with ISBN " + nonExistingISBNList + " does not exist",
                     BookStoreErrorCodes.BOOK_NOT_FOUND.getErrorCode());
         }

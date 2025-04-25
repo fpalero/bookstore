@@ -163,6 +163,7 @@ public class ClientsBookStoreControllerTests {
                                 BookEntity.builder()
                                                 .id(2l)
                                                 .title("Regular Book")
+                                                .quantity(2l)
                                                 .type(BookType.NEW_RELEASE)
                                                 .price(300L)
                                                 .isbn("978-1-23456-789-1")
@@ -174,6 +175,7 @@ public class ClientsBookStoreControllerTests {
                                 BookEntity.builder()
                                                 .id(3l)
                                                 .title("Old Edition Book")
+                                                .quantity(1l)
                                                 .type(BookType.OLD_EDITIONS)
                                                 .price(200L)
                                                 .isbn("978-1-23456-789-2")
@@ -185,6 +187,7 @@ public class ClientsBookStoreControllerTests {
                                 BookEntity.builder()
                                                 .id(4l)
                                                 .title("Another New Release")
+                                                .quantity(2l)
                                                 .type(BookType.NEW_RELEASE)
                                                 .price(600L)
                                                 .isbn("978-1-23456-789-3")
@@ -196,6 +199,7 @@ public class ClientsBookStoreControllerTests {
                                 BookEntity.builder()
                                                 .id(6l)
                                                 .title("Another Old Edition")
+                                                .quantity(1l)
                                                 .type(BookType.OLD_EDITIONS)
                                                 .price(250L)
                                                 .isbn("978-1-23456-789-5")
@@ -207,6 +211,7 @@ public class ClientsBookStoreControllerTests {
                                 BookEntity.builder()
                                                 .id(7l)
                                                 .title("Yet Another New Release")
+                                                .quantity(2l)
                                                 .type(BookType.NEW_RELEASE)
                                                 .price(550L)
                                                 .isbn("978-1-23456-789-6")
@@ -218,6 +223,7 @@ public class ClientsBookStoreControllerTests {
                                 BookEntity.builder()
                                                 .id(8l)
                                                 .title("Yet Another Regular Book")
+                                                .quantity(1l)
                                                 .type(BookType.REGULAR)
                                                 .price(400L)
                                                 .isbn("978-1-23456-789-7")
@@ -229,6 +235,7 @@ public class ClientsBookStoreControllerTests {
                                 BookEntity.builder()
                                                 .id(9l)
                                                 .title("Yet Another Old Edition")
+                                                .quantity(2l)
                                                 .type(BookType.OLD_EDITIONS)
                                                 .price(300L)
                                                 .isbn("978-1-23456-789-8")
@@ -240,6 +247,7 @@ public class ClientsBookStoreControllerTests {
                                 BookEntity.builder()
                                                 .id(10l)
                                                 .title("Final New Release")
+                                                .quantity(1l)
                                                 .type(BookType.NEW_RELEASE)
                                                 .price(700L)
                                                 .isbn("978-1-23456-789-9")
@@ -255,6 +263,7 @@ public class ClientsBookStoreControllerTests {
                                 BookEntity.builder()
                                                 .id(1l)
                                                 .title("New Release Book")
+                                                .quantity(2l)
                                                 .type(BookType.NEW_RELEASE)
                                                 .price(500L)
                                                 .isbn("978-1-23456-789-0")
@@ -266,6 +275,7 @@ public class ClientsBookStoreControllerTests {
                                 BookEntity.builder()
                                                 .id(2l)
                                                 .title("Regular Book")
+                                                .quantity(1l)
                                                 .type(BookType.NEW_RELEASE)
                                                 .price(300L)
                                                 .isbn("978-1-23456-789-1")
@@ -277,6 +287,7 @@ public class ClientsBookStoreControllerTests {
                                 BookEntity.builder()
                                                 .id(3l)
                                                 .title("Old Edition Book")
+                                                .quantity(2l)
                                                 .type(BookType.OLD_EDITIONS)
                                                 .price(200L)
                                                 .isbn("978-1-23456-789-2")
@@ -288,6 +299,7 @@ public class ClientsBookStoreControllerTests {
                                 BookEntity.builder()
                                                 .id(4l)
                                                 .title("Another New Release")
+                                                .quantity(1l)
                                                 .type(BookType.NEW_RELEASE)
                                                 .price(600L)
                                                 .isbn("978-1-23456-789-3")
@@ -299,6 +311,7 @@ public class ClientsBookStoreControllerTests {
                                 BookEntity.builder()
                                                 .id(5l)
                                                 .title("Another Regular Book")
+                                                .quantity(2l)
                                                 .type(BookType.REGULAR)
                                                 .price(350L)
                                                 .isbn("978-1-23456-789-4")
@@ -310,6 +323,7 @@ public class ClientsBookStoreControllerTests {
                                 BookEntity.builder()
                                                 .id(6l)
                                                 .title("Another Old Edition")
+                                                .quantity(1l)
                                                 .type(BookType.OLD_EDITIONS)
                                                 .price(250L)
                                                 .isbn("978-1-23456-789-5")
@@ -321,6 +335,7 @@ public class ClientsBookStoreControllerTests {
                                 BookEntity.builder()
                                                 .id(7l)
                                                 .title("Yet Another New Release")
+                                                .quantity(2l)
                                                 .type(BookType.NEW_RELEASE)
                                                 .price(550L)
                                                 .isbn("978-1-23456-789-6")
@@ -332,6 +347,7 @@ public class ClientsBookStoreControllerTests {
                                 BookEntity.builder()
                                                 .id(8l)
                                                 .title("Yet Another Regular Book")
+                                                .quantity(1l)
                                                 .type(BookType.REGULAR)
                                                 .price(400L)
                                                 .isbn("978-1-23456-789-7")
@@ -343,6 +359,7 @@ public class ClientsBookStoreControllerTests {
                                 BookEntity.builder()
                                                 .id(9l)
                                                 .title("Yet Another Old Edition")
+                                                .quantity(2l)
                                                 .type(BookType.OLD_EDITIONS)
                                                 .price(300L)
                                                 .isbn("978-1-23456-789-8")
@@ -354,6 +371,7 @@ public class ClientsBookStoreControllerTests {
                                 BookEntity.builder()
                                                 .id(10l)
                                                 .title("Final New Release")
+                                                .quantity(1l)
                                                 .type(BookType.NEW_RELEASE)
                                                 .price(700L)
                                                 .isbn("978-1-23456-789-9")
@@ -366,32 +384,32 @@ public class ClientsBookStoreControllerTests {
 
         private List<BookDto> getDtoBooks() {
                 return List.of(
-                                new BookDto("New Release Book", "NEW_RELEASE", 500L, "Author A", "Publisher A",
+                                new BookDto("New Release Book", 1, "NEW_RELEASE", 500L, "Author A", "Publisher A",
                                                 "978-1-23456-789-0", "",
                                                 2023),
-                                new BookDto("Regular Book", "NEW_RELEASE", 300L, "Author B", "Publisher B",
+                                new BookDto("Regular Book", 0, "NEW_RELEASE", 300L, "Author B", "Publisher B",
                                                 "978-1-23456-789-1", "",
                                                 2020),
-                                new BookDto("Old Edition Book", "OLD_EDITIONS", 200L, "Author C", "Publisher C",
+                                new BookDto("Old Edition Book", 1, "OLD_EDITIONS", 200L, "Author C", "Publisher C",
                                                 "978-1-23456-789-2",
                                                 "", 2010),
-                                new BookDto("Another New Release", "NEW_RELEASE", 600L, "Author D", "Publisher D",
+                                new BookDto("Another New Release", 0, "NEW_RELEASE", 600L, "Author D", "Publisher D",
                                                 "978-1-23456-789-3",
                                                 "", 2023),
-                                new BookDto("Another Regular Book", "REGULAR", 350L, "Author E", "Publisher E",
+                                new BookDto("Another Regular Book", 1, "REGULAR", 350L, "Author E", "Publisher E",
                                                 "978-1-23456-789-4", "",
                                                 2019),
-                                new BookDto("Another Old Edition", "OLD_EDITIONS", 250L, "Author F", "Publisher F",
+                                new BookDto("Another Old Edition", 0, "OLD_EDITIONS", 250L, "Author F", "Publisher F",
                                                 "978-1-23456-789-5",
                                                 "", 2005),
-                                new BookDto("Yet Another New Release", "NEW_RELEASE", 550L, "Author G",
+                                new BookDto("Yet Another New Release", 1, "NEW_RELEASE", 550L, "Author G",
                                                 "Publisher G", "978-1-23456-789-6", "", 2023),
-                                new BookDto("Yet Another Regular Book", "REGULAR", 400L, "Author H", "Publisher H",
+                                new BookDto("Yet Another Regular Book", 0, "REGULAR", 400L, "Author H", "Publisher H",
                                                 "978-1-23456-789-7",
                                                 "", 2018),
-                                new BookDto("Yet Another Old Edition", "OLD_EDITIONS", 300L, "Author I",
+                                new BookDto("Yet Another Old Edition", 1, "OLD_EDITIONS", 300L, "Author I",
                                                 "Publisher I", "978-1-23456-789-8", "", 2000),
-                                new BookDto("Final New Release", "NEW_RELEASE", 700L, "Author J", "Publisher J",
+                                new BookDto("Final New Release", 0, "NEW_RELEASE", 700L, "Author J", "Publisher J",
                                                 "978-1-23456-789-9",
                                                 "", 2023));
         }

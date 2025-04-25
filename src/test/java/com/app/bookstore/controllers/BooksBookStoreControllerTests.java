@@ -60,19 +60,20 @@ class BooksBookStoreControllerTests {
         private BooksDto getBooksDto() {
                 final List<BookDto> books = new ArrayList<>();
 
-                books.add(new BookDto("The Midnight Library", BookType.NEW_RELEASE.name(), 10L, "Matt Haig",
+                books.add(new BookDto("The Midnight Library", 2, BookType.NEW_RELEASE.name(), 10L, "Matt Haig",
                                 "Canongate Books",
                                 "9781786892737",
                                 "A novel about a library that allows you to explore alternate lives you could have lived.",
                                 2005));
                 books.add(new BookDto(
                                 "Where the Crawdads Sing",
+                                1,
                                 BookType.OLD_EDITIONS.name(),
                                 10L,
                                 "Delia Owens",
                                 "G.P. Putnam's Sons", "9780735219090",
                                 "A coming-of-age story set in the marshes of North Carolina.", 2012));
-                books.add(new BookDto("Pride and Prejudice", BookType.REGULAR.name(), 10L, "Jane Austen", "T. Egerton",
+                books.add(new BookDto("Pride and Prejudice", 4, BookType.REGULAR.name(), 10L, "Jane Austen", "T. Egerton",
                                 "9780141439518",
                                 "A romantic novel that critiques the British landed gentry at the end of the 18th century.",
                                 1990));
@@ -84,6 +85,7 @@ class BooksBookStoreControllerTests {
 
                 books.add(BookEntity.builder()
                                 .type(BookType.NEW_RELEASE)
+                                .quantity(2l)
                                 .title("The Midnight Library")
                                 .price(10L)
                                 .author("Matt Haig")
@@ -95,6 +97,7 @@ class BooksBookStoreControllerTests {
                 books.add(BookEntity.builder()
                                 .type(BookType.OLD_EDITIONS)
                                 .title("Where the Crawdads Sing")
+                                .quantity(1l)
                                 .price(10L)
                                 .author("Delia Owens")
                                 .publisher("G.P. Putnam's Sons")
@@ -105,6 +108,7 @@ class BooksBookStoreControllerTests {
                 books.add(BookEntity.builder()
                                 .type(BookType.REGULAR)
                                 .title("Pride and Prejudice")
+                                .quantity(4l)
                                 .price(10L)
                                 .author("Jane Austen")
                                 .publisher("T. Egerton")
