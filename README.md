@@ -40,11 +40,11 @@ Run on Local environment
     ./gradlew bootRun
     ```  
 or run on Container
+
     ```bash
     docker build -t bookstore .
     docker run -p 8080:8080 bookstore
     ```
-
 
 ## Accessing the Application
 

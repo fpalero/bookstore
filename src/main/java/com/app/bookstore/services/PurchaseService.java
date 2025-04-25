@@ -46,7 +46,7 @@ public class PurchaseService implements StoreService<OrderEntity> {
      * @return A PurchaseEntity containing the calculated total price and loyalty
      *         points.
      */
-    public PurchaseEntity calculateOrderDetails(List<BookEntity> books, List<String> freeBooks) {
+    public PurchaseEntity calculateOrderDetails(List<BookEntity> books, List<String> isbnList, List<String> freeBooks) {
         final long[] totalPrice = { 0L };
         final long[] loyaltyPoints = { 0L };
 
@@ -60,7 +60,7 @@ public class PurchaseService implements StoreService<OrderEntity> {
                 switch (book.getType()) {
                     case BookType.NEW_RELEASE:
                         totalPrice[0] += bookPrice;
-                        loyaltyPoints[0]++;
+                        loyaltyPoints[0]+=getTotalBooks(isbnList, book);
                         break;
                     case BookType.REGULAR:
                         if (books.size() >= 3) {
@@ -68,7 +68,7 @@ public class PurchaseService implements StoreService<OrderEntity> {
                         } else {
                             totalPrice[0] += bookPrice;
                         }
-                        loyaltyPoints[0]++;
+                        loyaltyPoints[0]+=getTotalBooks(isbnList, book);
                         break;
                     case BookType.OLD_EDITIONS:
                         if (books.size() >= 3) {
@@ -76,7 +76,7 @@ public class PurchaseService implements StoreService<OrderEntity> {
                         } else {
                             totalPrice[0] += bookPrice * 0.8; // 20% discount
                         }
-                        loyaltyPoints[0]++;
+                        loyaltyPoints[0]+=getTotalBooks(isbnList, book);
                         break;
                     default:
                         throw new PurchaseException("Unknown book type: " + book.getType(),
@@ -106,7 +106,7 @@ public class PurchaseService implements StoreService<OrderEntity> {
 
         checkLoyaltyPoints(order.getIsbnFreeList(), client);
 
-        PurchaseEntity purchase = calculateOrderDetails(books, order.getIsbnFreeList());
+        PurchaseEntity purchase = calculateOrderDetails(books, order.getIsbnList() ,order.getIsbnFreeList());
         purchase.setClient(client);
 
         long usedLoyaltyPoints = getUsedLoyaltyPoints(books, order.getIsbnFreeList());
@@ -132,7 +132,7 @@ public class PurchaseService implements StoreService<OrderEntity> {
         books.forEach(book -> {
 
             long currentQuantity = book.getQuantity();
-            long totalBooks = isbnList.stream().filter(isbn -> isbn.equals(book.getIsbn())).count();
+            long totalBooks = getTotalBooks(isbnList, book);
 
             long totalQuantity = currentQuantity - totalBooks;
 
@@ -151,6 +151,10 @@ public class PurchaseService implements StoreService<OrderEntity> {
         });
 
         booksRepository.saveAll(books);
+    }
+
+    private long getTotalBooks(List<String> isbnList, BookEntity book) {
+        return isbnList.stream().filter(isbn -> isbn.equals(book.getIsbn())).count();
     }
 
     private void updateClientLoyaltyPoints(ClientEntity client, Long loyaltyPoints, Long usedPoints) {
