@@ -558,7 +558,7 @@ public class ClientsBookStoreControllerTests {
 
                 assertThat(response.getStatusCode().is4xxClientError()).isTrue();
                 assertThat(response.getBody()).isEqualTo(new BookStoreError(105,
-                                "Book Store exception thrown: {isbnList=must not be empty}"));
+                                "Book Store exception thrown: {purchasedBook=must not be empty}"));
         }
 
         @Test

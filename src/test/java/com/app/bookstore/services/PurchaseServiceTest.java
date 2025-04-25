@@ -49,7 +49,7 @@ public class PurchaseServiceTest {
 
         OrderEntity order = OrderEntity.builder()
                 .clientId(1L)
-                .isbnList(List.of(
+                .purchasedBook(List.of(
                         "978-1-23456-789-0",
                         "978-1-23456-789-1",
                         "978-1-23456-789-2",
@@ -60,7 +60,7 @@ public class PurchaseServiceTest {
                         "978-1-23456-789-7",
                         "978-1-23456-789-8",
                         "978-1-23456-789-9"))
-                .isbnFreeList(List.of(
+                .freeBooks(List.of(
                         "978-1-23456-789-0", // This book will be not included in the calculation as it is a free book becase it is a new release
                         "978-1-23456-789-2",
                         "978-1-23456-789-4",
@@ -103,12 +103,12 @@ public class PurchaseServiceTest {
 
         OrderEntity order = OrderEntity.builder()
                 .clientId(1L)
-                .isbnList(List.of(
+                .purchasedBook(List.of(
                         "978-1-23456-789-2",
                         "978-1-23456-789-2",
                         "978-1-23456-789-2",
                         "978-1-23456-789-4"))
-                .isbnFreeList(Collections.emptyList())
+                .freeBooks(Collections.emptyList())
                 .build();
 
         assertThatThrownBy(() -> service.run(order))
@@ -134,10 +134,10 @@ public class PurchaseServiceTest {
 
         OrderEntity order = OrderEntity.builder()
                 .clientId(1L)
-                .isbnList(List.of(
+                .purchasedBook(List.of(
                         "978-1-23456-789-2",
                         "978-1-23456-789-4"))
-                .isbnFreeList(Collections.emptyList())
+                .freeBooks(Collections.emptyList())
                 .build();
 
         assertThat(service.run(order)).usingRecursiveComparison()

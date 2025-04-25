@@ -23,7 +23,7 @@ public class BookDto {
     private String author;
     private String publisher;
 
-    @Schema(description = "The ISBN identify a book and it is used for purchasing.", example = "978-3-16-148410-0")
+    @Schema(description = "The ISBN identify a book and it is used for purchasing.", example = "9780061120084")
     private String isbn;
     private String description;
     private Integer publicationYear;

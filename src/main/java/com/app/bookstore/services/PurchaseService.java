@@ -46,37 +46,38 @@ public class PurchaseService implements StoreService<OrderEntity> {
      * @return A PurchaseEntity containing the calculated total price and loyalty
      *         points.
      */
-    public PurchaseEntity calculateOrderDetails(List<BookEntity> books, List<String> isbnList, List<String> freeBooks) {
+    public PurchaseEntity calculateOrderDetails(List<BookEntity> books, List<String> pruchasedBooks, List<String> freeIsbnBooks) {
         final long[] totalPrice = { 0L };
         final long[] loyaltyPoints = { 0L };
 
+
         if (books != null) {
             books.forEach(book -> {
-                if (freeBooks != null && freeBooks.contains(book.getIsbn()) && book.getType() != BookType.NEW_RELEASE) {
-                    return; // Skip processing for free books
-                }
 
                 long bookPrice = book.getPrice();
                 switch (book.getType()) {
                     case BookType.NEW_RELEASE:
-                        totalPrice[0] += bookPrice;
-                        loyaltyPoints[0]+=getTotalBooks(isbnList, book);
+                        long totalBooks = getTotalBooks(pruchasedBooks, book);
+                        totalPrice[0] += bookPrice * totalBooks;
+                        loyaltyPoints[0]+= totalBooks;
                         break;
                     case BookType.REGULAR:
-                        if (books.size() >= 3) {
-                            totalPrice[0] += bookPrice * 0.9; // 10% discount
+                        long totalRegularBooks = getTotalBooks(pruchasedBooks, freeIsbnBooks, book);
+                        if (pruchasedBooks.size() >= 3) {
+                            totalPrice[0] += bookPrice * 0.9 * totalRegularBooks; // 10% discount
                         } else {
-                            totalPrice[0] += bookPrice;
+                            totalPrice[0] += bookPrice * totalRegularBooks;
                         }
-                        loyaltyPoints[0]+=getTotalBooks(isbnList, book);
+                        loyaltyPoints[0]+= totalRegularBooks;
                         break;
                     case BookType.OLD_EDITIONS:
-                        if (books.size() >= 3) {
-                            totalPrice[0] += bookPrice * 0.75; // 20% + 5% discount
+                        long totalOldBooks = getTotalBooks(pruchasedBooks, freeIsbnBooks, book);
+                        if (pruchasedBooks.size() >= 3) {
+                            totalPrice[0] += bookPrice * 0.75 * totalOldBooks; // 20% + 5% discount
                         } else {
-                            totalPrice[0] += bookPrice * 0.8; // 20% discount
+                            totalPrice[0] += bookPrice * 0.8 * totalOldBooks; // 20% discount
                         }
-                        loyaltyPoints[0]+=getTotalBooks(isbnList, book);
+                        loyaltyPoints[0]+=totalOldBooks;
                         break;
                     default:
                         throw new PurchaseException("Unknown book type: " + book.getType(),
@@ -104,28 +105,36 @@ public class PurchaseService implements StoreService<OrderEntity> {
 
         List<BookEntity> books = getBooks(order);
 
-        checkLoyaltyPoints(order.getIsbnFreeList(), client);
+        checkLoyaltyPoints(order.getFreeBooks(), client);
 
-        PurchaseEntity purchase = calculateOrderDetails(books, order.getIsbnList() ,order.getIsbnFreeList());
+        PurchaseEntity purchase = calculateOrderDetails(books, order.getPurchasedBook() ,order.getFreeBooks());
         purchase.setClient(client);
 
-        long usedLoyaltyPoints = getUsedLoyaltyPoints(books, order.getIsbnFreeList());
+        long usedLoyaltyPoints = getUsedLoyaltyPoints(books, order.getFreeBooks());
         updateClientLoyaltyPoints(client, purchase.getLoyaltyPoints(), usedLoyaltyPoints);
 
-        updateBooksSoldStatus(books , order.getIsbnList());
+        updateBooksSoldStatus(books , order.getPurchasedBook());
 
         return purchase;
     }
 
     private Long getUsedLoyaltyPoints(List<BookEntity> books, List<String> freeBooks) {
+        List<String> freeBooksList = List.copyOf(freeBooks);
+
         if (freeBooks == null || freeBooks.isEmpty()) {
             return 0L;
 
         }
-        // Calculate the number of loyalty points used for the books purchased
+        // Calculate the number of loyalty points used for the books purchased.
+        // It is multiplied * 10 because it is necessary 10 loyalty point for one free book.
         return books.stream()
-                .filter(book -> freeBooks.contains(book.getIsbn()) && book.getType() != BookType.NEW_RELEASE)
-                .count() * 10l;
+                .map(book -> {
+                    if (freeBooksList.contains(book.getIsbn()) && book.getType() != BookType.NEW_RELEASE) {
+                        return getTotalBooks(freeBooksList, book);
+                    }
+                    return 0L;
+                })    
+                .reduce(0L, Long::sum) * 10;
     }
 
     private void updateBooksSoldStatus(List<BookEntity> books, List<String> isbnList) {
@@ -153,8 +162,14 @@ public class PurchaseService implements StoreService<OrderEntity> {
         booksRepository.saveAll(books);
     }
 
-    private long getTotalBooks(List<String> isbnList, BookEntity book) {
-        return isbnList.stream().filter(isbn -> isbn.equals(book.getIsbn())).count();
+    private long getTotalBooks(List<String> purchasedBooks, List<String> freeBooks, BookEntity book) {
+        long totalFreeBooks = freeBooks.stream().filter(isbn -> isbn.equals(book.getIsbn())).count();
+        long totalPurchasedBooks = getTotalBooks(purchasedBooks, book);
+        return totalPurchasedBooks - totalFreeBooks;
+    }
+
+    private long getTotalBooks(List<String> purchasedBooks, BookEntity book) {
+        return purchasedBooks.stream().filter(isbn -> isbn.equals(book.getIsbn())).count();
     }
 
     private void updateClientLoyaltyPoints(ClientEntity client, Long loyaltyPoints, Long usedPoints) {
@@ -173,14 +188,14 @@ public class PurchaseService implements StoreService<OrderEntity> {
     }
 
     private List<BookEntity> getBooks(OrderEntity order) {
-        if (order.getIsbnList() == null || order.getIsbnList().isEmpty()) {
+        if (order.getPurchasedBook() == null || order.getPurchasedBook().isEmpty()) {
             throw new PurchaseException("The list of books cannot be null or empty",
                     BookStoreErrorCodes.INCORRECT_ORDER.getErrorCode());
         }
 
         // Check if the books in the order exist in the list of available books
         // If not, throw an exception
-        List<BookEntity> books = booksRepository.findAllByIsbn(order.getIsbnList());
+        List<BookEntity> books = booksRepository.findAllByIsbn(order.getPurchasedBook());
         if (books == null || books.isEmpty()) {
             throw new PurchaseException("No books found for the given ISBN list",
                     BookStoreErrorCodes.BOOK_NOT_FOUND.getErrorCode());
@@ -190,7 +205,7 @@ public class PurchaseService implements StoreService<OrderEntity> {
                 .map(BookEntity::getIsbn)
                 .collect(Collectors.toList());
 
-        List<String> nonExistingISBNList = order.getIsbnList().stream()
+        List<String> nonExistingISBNList = order.getPurchasedBook().stream()
                 .filter(isbn -> !dbIsbnList.contains(isbn))
                 .collect(Collectors.toList());
         if (nonExistingISBNList.size() > 0) {
@@ -200,10 +215,10 @@ public class PurchaseService implements StoreService<OrderEntity> {
 
         // Check if the free books in the order exist in the list of available books
         // If not, throw an exception
-        if (order.getIsbnFreeList() != null) {
-            List<String> nonExistIsbnFreeList = order.getIsbnFreeList()
+        if (order.getFreeBooks() != null) {
+            List<String> nonExistIsbnFreeList = order.getFreeBooks()
                     .stream()
-                    .filter(isbn -> !order.getIsbnList().contains(isbn))
+                    .filter(isbn -> !order.getPurchasedBook().contains(isbn))
                     .collect(Collectors.toList());
             if (nonExistIsbnFreeList.size() > 0) {
                 throw new PurchaseException(

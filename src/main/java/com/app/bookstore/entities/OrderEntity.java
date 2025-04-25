@@ -13,6 +13,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class OrderEntity implements StoreEntity {
     private Long clientId;
-    private List<String> isbnList;
-    private List<String> isbnFreeList;
+    private List<String> purchasedBook;
+    private List<String> freeBooks;
 }
